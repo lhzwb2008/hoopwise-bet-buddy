@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import GameCard from "../components/GameCard";
 import AIInsights from "../components/AIInsights";
+import AIPredictionEngine from "../components/AIPredictionEngine";
+import AISentimentAnalysis from "../components/AISentimentAnalysis";
 import { ChevronRight, Brain, Target, Activity } from "lucide-react";
 
 interface Team {
@@ -165,6 +167,14 @@ const Index = () => {
             {upcomingGames.map(game => (
               <GameCard key={game.id} {...game} />
             ))}
+          </div>
+        </section>
+
+        {/* AI Components Section */}
+        <section className="section-container">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <AIPredictionEngine />
+            <AISentimentAnalysis />
           </div>
         </section>
 
