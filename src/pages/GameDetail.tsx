@@ -113,11 +113,14 @@ const GameDetail = () => {
         {/* Live Score */}
         <div className="mb-8">
           <LiveScore 
+            gameId={game.id}
             homeTeam={game.homeTeam} 
             awayTeam={game.awayTeam} 
             status={game.status}
-            quarter={game.quarter}
+            currentQuarter={game.quarter}
             timeRemaining={game.timeRemaining}
+            homeScore={game.homeTeam.score}
+            awayScore={game.awayTeam.score}
           />
         </div>
         
@@ -161,7 +164,11 @@ const GameDetail = () => {
               </div>
             </div>
             
-            <TeamStats homeTeam={game.homeTeam} awayTeam={game.awayTeam} />
+            <TeamStats 
+              teamId={game.homeTeam.id} 
+              comparison={true} 
+              opponentId={game.awayTeam.id} 
+            />
           </div>
           
           {/* Right Column - Betting Slip */}
