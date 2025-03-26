@@ -1,85 +1,98 @@
 
 import React from 'react';
 
-interface ScoreByQuarter {
-  quarter: number;
-  score: number;
-}
-
 interface Team {
   id: string;
   name: string;
   abbreviation: string;
-  logo: string;
+  logo?: string;
 }
 
-interface QuarterScoresTableProps {
+export interface QuarterScoresTableProps {
   homeTeam: Team;
   awayTeam: Team;
-  homeScore: number;
-  awayScore: number;
-  homeScoreByQuarter: ScoreByQuarter[];
-  awayScoreByQuarter: ScoreByQuarter[];
-  currentQuarter: number;
+  homeQuarters: number[]; // Adding the missing property
+  awayQuarters: number[]; // Adding the missing property
+  homeTotal: number; // Adding the missing property
+  awayTotal: number; // Adding the missing property
+  status: 'scheduled' | 'live' | 'final';
+  currentQuarter?: number;
 }
 
 const QuarterScoresTable = ({
   homeTeam,
   awayTeam,
-  homeScore,
-  awayScore,
-  homeScoreByQuarter,
-  awayScoreByQuarter,
-  currentQuarter,
+  homeQuarters,
+  awayQuarters,
+  homeTotal,
+  awayTotal,
+  status,
+  currentQuarter
 }: QuarterScoresTableProps) => {
-  // Fill quarter scores if they don't exist
-  const filledHomeQuarters = Array.from({ length: 4 }, (_, i) => {
-    const quarter = homeScoreByQuarter.find(q => q.quarter === i + 1);
-    return quarter ? quarter.score : 0;
-  });
-  
-  const filledAwayQuarters = Array.from({ length: 4 }, (_, i) => {
-    const quarter = awayScoreByQuarter.find(q => q.quarter === i + 1);
-    return quarter ? quarter.score : 0;
-  });
-
   return (
-    <div className="mt-8">
-      <h4 className="text-sm font-medium mb-3 text-muted-foreground">Score By Quarter</h4>
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-full text-sm">
-          <thead>
-            <tr>
-              <th className="py-2 px-4 text-left font-medium text-muted-foreground">Team</th>
-              <th className="py-2 px-4 text-center font-medium text-muted-foreground">Q1</th>
-              <th className="py-2 px-4 text-center font-medium text-muted-foreground">Q2</th>
-              <th className="py-2 px-4 text-center font-medium text-muted-foreground">Q3</th>
-              <th className="py-2 px-4 text-center font-medium text-muted-foreground">Q4</th>
-              <th className="py-2 px-4 text-center font-medium text-muted-foreground">Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td className="py-2 px-4 border-t border-border">{awayTeam.abbreviation}</td>
-              {filledAwayQuarters.map((score, i) => (
-                <td key={`away-q-${i}`} className="py-2 px-4 text-center border-t border-border">
-                  {currentQuarter >= i + 1 ? score : '-'}
-                </td>
-              ))}
-              <td className="py-2 px-4 text-center font-bold border-t border-border">{awayScore}</td>
-            </tr>
-            <tr>
-              <td className="py-2 px-4 border-t border-border">{homeTeam.abbreviation}</td>
-              {filledHomeQuarters.map((score, i) => (
-                <td key={`home-q-${i}`} className="py-2 px-4 text-center border-t border-border">
-                  {currentQuarter >= i + 1 ? score : '-'}
-                </td>
-              ))}
-              <td className="py-2 px-4 text-center font-bold border-t border-border">{homeScore}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="border-b">
+            <th className="px-2 py-2 text-left">Team</th>
+            {[1, 2, 3, 4].map((quarter) => (
+              <th 
+                key={quarter} 
+                className={`px-3 py-2 text-center w-16 ${
+                  status === 'live' && quarter === currentQuarter 
+                    ? 'bg-primary/10 text-primary' 
+                    : ''
+                }`}
+              >
+                Q{quarter}
+              </th>
+            ))}
+            <th className="px-3 py-2 text-center font-medium">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr className="border-b">
+            <td className="px-2 py-3 font-medium">
+              {awayTeam.abbreviation}
+            </td>
+            {[0, 1, 2, 3].map((i) => (
+              <td 
+                key={i} 
+                className={`px-3 py-3 text-center ${
+                  status === 'live' && i + 1 === currentQuarter 
+                    ? 'text-primary font-medium' 
+                    : ''
+                }`}
+              >
+                {awayQuarters[i] || '-'}
+              </td>
+            ))}
+            <td className="px-3 py-3 text-center font-bold">
+              {awayTotal}
+            </td>
+          </tr>
+          <tr>
+            <td className="px-2 py-3 font-medium">
+              {homeTeam.abbreviation}
+            </td>
+            {[0, 1, 2, 3].map((i) => (
+              <td 
+                key={i} 
+                className={`px-3 py-3 text-center ${
+                  status === 'live' && i + 1 === currentQuarter 
+                    ? 'text-primary font-medium' 
+                    : ''
+                }`}
+              >
+                {homeQuarters[i] || '-'}
+              </td>
+            ))}
+            <td className="px-3 py-3 text-center font-bold">
+              {homeTotal}
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   );
 };

@@ -6,35 +6,42 @@ interface Team {
   name: string;
   abbreviation: string;
   logo: string;
+  winProbability?: number;
 }
 
-interface TeamScoreDisplayProps {
+export interface TeamScoreDisplayProps {
   team: Team;
-  score: number;
+  score?: number;
+  isAway: boolean; // Adding the missing property
   status: 'scheduled' | 'live' | 'final';
 }
 
-const TeamScoreDisplay = ({ team, score, status }: TeamScoreDisplayProps) => {
+const TeamScoreDisplay = ({ team, score = 0, isAway, status }: TeamScoreDisplayProps) => {
   return (
-    <div className="flex items-center">
-      <div className="flex-shrink-0 w-16 h-16 mr-4 overflow-hidden rounded-lg">
-        <img 
-          src={team.logo} 
-          alt={team.name} 
-          className="w-full h-full object-cover"
-        />
-      </div>
-      <div className="flex-1">
-        <div className="flex items-center">
-          <h3 className="font-semibold">{team.name}</h3>
-          <span className="ml-2 px-2 py-0.5 rounded text-xs bg-muted text-muted-foreground">
-            {team.abbreviation}
-          </span>
+    <div className={`flex items-center justify-between ${isAway ? 'mb-2' : ''}`}>
+      <div className="flex items-center space-x-3">
+        <div className="w-14 h-14 rounded-full overflow-hidden bg-secondary/30 flex items-center justify-center">
+          {team.logo ? (
+            <img src={team.logo} alt={team.name} className="w-10 h-10 object-contain" />
+          ) : (
+            <span className="text-lg font-bold">{team.abbreviation}</span>
+          )}
+        </div>
+        <div>
+          <h3 className="font-semibold text-lg">{team.name}</h3>
+          {team.winProbability !== undefined && (
+            <div className="text-xs text-muted-foreground">
+              Win probability: {Math.round(team.winProbability * 100)}%
+            </div>
+          )}
         </div>
       </div>
-      <div className="text-4xl font-bold ml-auto">
-        {status !== 'scheduled' ? score : '-'}
-      </div>
+      
+      {status !== 'scheduled' && (
+        <div className="text-3xl font-bold tabular-nums">
+          {score}
+        </div>
+      )}
     </div>
   );
 };
