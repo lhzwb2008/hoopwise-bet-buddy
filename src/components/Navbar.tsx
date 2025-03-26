@@ -29,6 +29,14 @@ const Navbar = () => {
     { name: "Stats", path: "/stats", icon: <ChartBar className="w-4 h-4 mr-2" /> },
   ];
 
+  // Check if current path is active, handle exact match for home page
+  const isActiveRoute = (path: string) => {
+    if (path === "/") {
+      return location.pathname === "/";
+    }
+    return location.pathname.startsWith(path);
+  };
+
   return (
     <nav 
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-4 sm:px-6 ${
@@ -50,7 +58,7 @@ const Navbar = () => {
               key={item.path}
               to={item.path}
               className={`px-4 py-2 rounded-lg flex items-center transition-colors ${
-                location.pathname === item.path
+                isActiveRoute(item.path)
                   ? "bg-primary/10 text-primary"
                   : "hover:bg-secondary"
               }`}

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Activity } from 'lucide-react';
+import { Activity, Calendar, CheckCircle } from 'lucide-react';
 
 interface GameStatusIndicatorProps {
   status: 'scheduled' | 'live' | 'final';
@@ -27,12 +27,22 @@ const GameStatusIndicator = ({
     );
   } else if (status === 'scheduled') {
     return (
-      <div className="text-sm font-medium text-muted-foreground">
-        Starting {startTime}
+      <div className="flex items-center space-x-2">
+        <Calendar className="w-4 h-4 text-muted-foreground" />
+        <div className="text-sm font-medium text-muted-foreground">
+          Starting {startTime}
+        </div>
       </div>
     );
   } else {
-    return <div className="pill pill-muted">FINAL</div>;
+    return (
+      <div className="flex items-center space-x-2">
+        <div className="pill pill-muted flex items-center">
+          <CheckCircle className="w-3 h-3 mr-1" />
+          <span>FINAL</span>
+        </div>
+      </div>
+    );
   }
 };
 

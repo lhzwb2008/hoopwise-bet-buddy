@@ -1,7 +1,7 @@
 
-import React, { useEffect, useState } from 'react';
-import GameStatusIndicator from './GameStatusIndicator';
+import React from 'react';
 import TeamScoreDisplay from './TeamScoreDisplay';
+import GameStatusIndicator from './GameStatusIndicator';
 import QuarterScoresTable from './QuarterScoresTable';
 
 interface Team {
@@ -9,24 +9,18 @@ interface Team {
   name: string;
   abbreviation: string;
   logo: string;
-}
-
-interface ScoreByQuarter {
-  quarter: number;
-  score: number;
+  winProbability?: number;
 }
 
 interface LiveScoreProps {
   gameId: string;
   homeTeam: Team;
   awayTeam: Team;
-  currentQuarter?: number;
-  timeRemaining?: string;
   homeScore?: number;
   awayScore?: number;
-  homeScoreByQuarter?: ScoreByQuarter[];
-  awayScoreByQuarter?: ScoreByQuarter[];
   status: 'scheduled' | 'live' | 'final';
+  currentQuarter?: number;
+  timeRemaining?: string;
   startTime?: string;
 }
 
@@ -34,96 +28,101 @@ const LiveScore = ({
   gameId,
   homeTeam,
   awayTeam,
-  currentQuarter = 0,
-  timeRemaining = '',
   homeScore = 0,
   awayScore = 0,
-  homeScoreByQuarter = [],
-  awayScoreByQuarter = [],
   status,
-  startTime = '',
+  currentQuarter,
+  timeRemaining,
+  startTime,
 }: LiveScoreProps) => {
-  const [animatedHomeScore, setAnimatedHomeScore] = useState(homeScore);
-  const [animatedAwayScore, setAnimatedAwayScore] = useState(awayScore);
-  
-  // Animate score changes
-  useEffect(() => {
-    if (homeScore > animatedHomeScore) {
-      const interval = setInterval(() => {
-        setAnimatedHomeScore(prev => {
-          const next = prev + 1;
-          if (next >= homeScore) {
-            clearInterval(interval);
-            return homeScore;
-          }
-          return next;
-        });
-      }, 50);
-      return () => clearInterval(interval);
-    } else {
-      setAnimatedHomeScore(homeScore);
+  // Generate mock quarter scores
+  const generateQuarterScores = () => {
+    if (status === 'scheduled') return null;
+    
+    const quarters = status === 'live' ? currentQuarter || 4 : 4;
+    const homeQuarters = [];
+    const awayQuarters = [];
+    
+    let homeTotal = 0;
+    let awayTotal = 0;
+    
+    for (let i = 0; i < quarters; i++) {
+      // Generate realistic quarter scores between 18-32 points
+      const homeQuarterScore = status === 'live' && i === quarters - 1 
+        ? Math.round((homeScore - homeTotal) * 10) / 10
+        : Math.floor(Math.random() * (32 - 18) + 18);
+      
+      const awayQuarterScore = status === 'live' && i === quarters - 1 
+        ? Math.round((awayScore - awayTotal) * 10) / 10
+        : Math.floor(Math.random() * (32 - 18) + 18);
+      
+      homeQuarters.push(homeQuarterScore);
+      awayQuarters.push(awayQuarterScore);
+      
+      if (i < quarters - 1 || status === 'final') {
+        homeTotal += homeQuarterScore;
+        awayTotal += awayQuarterScore;
+      }
     }
-  }, [homeScore, animatedHomeScore]);
+    
+    return {
+      homeQuarters,
+      awayQuarters,
+      homeTotal: homeScore || homeTotal,
+      awayTotal: awayScore || awayTotal
+    };
+  };
   
-  useEffect(() => {
-    if (awayScore > animatedAwayScore) {
-      const interval = setInterval(() => {
-        setAnimatedAwayScore(prev => {
-          const next = prev + 1;
-          if (next >= awayScore) {
-            clearInterval(interval);
-            return awayScore;
-          }
-          return next;
-        });
-      }, 50);
-      return () => clearInterval(interval);
-    } else {
-      setAnimatedAwayScore(awayScore);
-    }
-  }, [awayScore, animatedAwayScore]);
+  const quarterScores = generateQuarterScores();
   
   return (
-    <div className="glass-card rounded-xl p-6 animation-fade-in">
-      {/* Game Status Indicator */}
-      <div className="flex items-center justify-between mb-6">
-        <GameStatusIndicator 
-          status={status}
-          currentQuarter={currentQuarter}
-          timeRemaining={timeRemaining}
-          startTime={startTime}
-        />
-      </div>
-      
-      {/* Team Scores */}
-      <div className="space-y-6">
-        {/* Away Team */}
-        <TeamScoreDisplay 
-          team={awayTeam}
-          score={animatedAwayScore}
-          status={status}
-        />
+    <div className="glass-card rounded-xl overflow-hidden animation-fade-in">
+      <div className="p-4 lg:p-6">
+        {/* Game Status */}
+        <div className="flex justify-between items-center mb-6">
+          <GameStatusIndicator 
+            status={status}
+            currentQuarter={currentQuarter}
+            timeRemaining={timeRemaining}
+            startTime={startTime}
+          />
+          
+          {/* Additional options could go here */}
+        </div>
         
-        {/* Home Team */}
-        <TeamScoreDisplay 
-          team={homeTeam}
-          score={animatedHomeScore}
-          status={status}
-        />
+        {/* Team Scores */}
+        <div className="space-y-4 mb-6">
+          <TeamScoreDisplay 
+            team={awayTeam}
+            score={awayScore}
+            isAway={true}
+            status={status}
+          />
+          
+          <TeamScoreDisplay 
+            team={homeTeam}
+            score={homeScore}
+            isAway={false}
+            status={status}
+          />
+        </div>
+        
+        {/* Quarter Scores */}
+        {quarterScores && (
+          <div className="mt-8">
+            <QuarterScoresTable 
+              homeTeam={homeTeam}
+              awayTeam={awayTeam}
+              homeQuarters={quarterScores.homeQuarters}
+              awayQuarters={quarterScores.awayQuarters}
+              homeTotal={quarterScores.homeTotal}
+              awayTotal={quarterScores.awayTotal}
+              status={status}
+              currentQuarter={currentQuarter}
+            />
+          </div>
+        )}
       </div>
-      
-      {/* Quarter-by-Quarter Scores */}
-      {status !== 'scheduled' && (
-        <QuarterScoresTable
-          homeTeam={homeTeam}
-          awayTeam={awayTeam}
-          homeScore={animatedHomeScore}
-          awayScore={animatedAwayScore}
-          homeScoreByQuarter={homeScoreByQuarter}
-          awayScoreByQuarter={awayScoreByQuarter}
-          currentQuarter={currentQuarter}
-        />
-      )}
     </div>
   );
 };
